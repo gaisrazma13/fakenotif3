@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>FAKE-NOTIF-RAXZZ</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body,html{
+  margin:0;
+  padding:0;
+  font-family:Arial;
+  height:100%;
+  overflow:hidden;
+  background:#000;
+}
+
+/* ================= iPHONE BLUR STYLE ================= */
+.blur-all #ui,
+.blur-all #history-page,
+.blur-all #topbar{
+  filter: blur(18px);
+  transition: 0.4s ease;
+}
+
+.blur-all #notif-container{
+  filter: blur(0px); /* notif tetap jelas */
+}
+
+/* TOP */
+#topbar{
+  position:fixed;
+  top:0;
+  width:100%;
+  padding:10px;
+  color:white;
+  z-index:10;
+}
+
+/* NOTIF */
+#notif-container{
+  position:fixed;
+  top:60px;
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:10px;
+  z-index:20;
+}
+
+.notif{
+  width:92%;
+  max-width:360px;
+  background:rgba(20,20,20,0.8);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color:white;
+  border-radius:16px;
+  padding:10px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  border:1px solid rgba(255,255,255,0.08);
+  animation:drop .25s ease;
+}
+
+@keyframes drop{
+  from{transform:translateY(-20px); opacity:0;}
+  to{transform:translateY(0); opacity:1;}
+}
+
+.notif img{
+  width:42px;
+  height:42px;
+  border-radius:10px;
+}
+
+.small{
+  font-size:12px;
+  color:#aaa;
+}
+
+/* HISTORY */
+#history-page{
+  position:fixed;
+  inset:60px 0 80px 0;
+  overflow-y:auto;
+  background:#000;
+  display:none;
+  padding:10px;
+}
+
+.history-item{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:10px;
+  margin-bottom:8px;
+  background:#111;
+  border:1px solid #222;
+  border-radius:12px;
+  color:white;
+}
+
+.history-item img{
+  width:24px;
+  height:24px;
+  border-radius:6px;
+}
+
+/* UI */
+#ui{
+  position:fixed;
+  bottom:0;
+  width:100%;
+  padding:8px;
+  background:#000;
+  border-top:1px solid #222;
+  z-index:10;
+}
+
+select,input,button{
+  width:100%;
+  margin:4px 0;
+  padding:10px;
+  border-radius:12px;
+  border:none;
+  outline:none;
+  background:#111;
+  color:white;
+  border:1px solid #333;
+}
+
+input::placeholder{
+  color:#888;
+}
+
+button{
+  background:#111;
+}
+</style>
+</head>
+
+<body>
+
+<div id="topbar">
+  <div id="clock">00:00:00</div>
+</div>
+
+<div id="notif-container"></div>
+
+<div id="history-page">
+  <h3 style="color:white">RIWAYAT NOTIF</h3>
+  <div id="history-list"></div>
+</div>
+
+<div id="ui">
+
+  <select id="app"></select>
+
+  <input id="name" placeholder="Nama APK / Orang">
+  <input id="msg" placeholder="Isi pesan">
+
+  <button onclick="sendNotif()">KIRIM NOTIF∆</button>
+  <button onclick="goHistory()">RIWAYAT∆</button>
+  <button onclick="toggleBlur()">BLUR MODE∆</button>
+
+</div>
+
+<script>
+
+let blur=false;
+let historyData=[];
+let isHistoryOpen=false;
+
+/* CLOCK */
+setInterval(()=>{
+  document.getElementById("clock").innerText=
+  new Date().toLocaleTimeString();
+},1000);
+
+/* BLUR iPHONE */
+function toggleBlur(){
+  blur=!blur;
+  document.body.classList.toggle("blur-all",blur);
+}
+
+/* TOGGLE HISTORY (FIXED) */
+function goHistory(){
+
+  isHistoryOpen = !isHistoryOpen;
+
+  if(isHistoryOpen){
+    document.getElementById("history-page").style.display="block";
+    renderHistory();
+  }else{
+    document.getElementById("history-page").style.display="none";
+  }
+}
+
+/* APPS */
+const apps={
+"Shopee Indonesia":"https://i.postimg.cc/NfFz3mMv/Screenshot-20260415-002748-1.jpg",
+"Roblox":"https://i.postimg.cc/YqyS150b/Screenshot-20260415-002846-1.jpg",
+"Instagram":"https://i.postimg.cc/vTZQnhsQ/Screenshot-20260415-003010-1.jpg",
+"Facebook":"https://i.postimg.cc/Xvqm9PG6/Screenshot-20260415-003031-1.jpg",
+"TikTok":"https://i.postimg.cc/gkp7gjX4/Screenshot-20260415-003043-1.jpg",
+"Telegram":"https://i.postimg.cc/P5R2n5x7/Screenshot-20260415-003119-1.jpg",
+"Free Fire Max":"https://i.postimg.cc/DfNZsV8t/IMG-20260415-011939-394.jpg",
+"Mobile Legends":"https://i.postimg.cc/8zRPqjw2/IMG-20260415-011811-187.jpg",
+"WhatsApp":"https://i.postimg.cc/pTp9bPmY/IMG-20260415-011811-027.jpg",
+"Minecraft":"https://i.postimg.cc/gJTYvRky/IMG-20260415-011811-526.jpg",
+"Honor of Kings":"https://i.postimg.cc/Pxg5gYGB/IMG-20260415-011954-262.jpg",
+"PUBG":"https://i.postimg.cc/137sxwwv/IMG-20260415-011955-875.jpg",
+"Dana":"https://i.postimg.cc/Y0Btn7YB/IMG-20260415-011946-172.jpg",
+"Gopay":"https://i.postimg.cc/KvJyLBqk/IMG-20260415-011950-807.jpg",
+"BRImo":"https://i.postimg.cc/fysh7KQ5/IMG-20260415-011952-074.jpg"
+};
+
+/* LOAD */
+const sel=document.getElementById("app");
+for(let k in apps){
+  let o=document.createElement("option");
+  o.value=k;
+  o.innerText=k;
+  sel.appendChild(o);
+}
+
+/* NOTIF FIX 5 DETIK */
+function sendNotif(){
+  const a=document.getElementById("app").value;
+  const n=document.getElementById("name").value||a;
+  const m=document.getElementById("msg").value||"Pesan baru";
+
+  const notif=document.createElement("div");
+  notif.className="notif";
+
+  notif.innerHTML=`
+    <img src="${apps[a]}">
+    <div>
+      <b>${n}</b><br>
+      <div class="small">${m}</div>
+    </div>
+  `;
+
+  document.getElementById("notif-container").prepend(notif);
+
+  setTimeout(()=>{
+    notif.style.opacity="0";
+    notif.style.transition="0.3s";
+    setTimeout(()=>notif.remove(),300);
+  },5000);
+
+  historyData.push({app:a,name:n,msg:m});
+}
+
+/* HISTORY */
+function renderHistory(){
+  const box=document.getElementById("history-list");
+  box.innerHTML="";
+
+  historyData.forEach(d=>{
+    const item=document.createElement("div");
+    item.className="history-item";
+
+    item.innerHTML=`
+      <img src="${apps[d.app]}">
+      <div>
+        <b>${d.name}</b><br>
+        <span class="small">${d.msg}</span>
+      </div>
+    `;
+
+    box.appendChild(item);
+  });
+}
+
+</script>
+
+</body>
+</html>
